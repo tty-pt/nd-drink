@@ -1,5 +1,3 @@
-/* REQUIRES: mortal */
-
 #ifndef DRINK_H
 #define DRINK_H
 

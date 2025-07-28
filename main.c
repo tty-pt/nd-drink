@@ -11,16 +11,12 @@
 unsigned act_fill, act_drink, act_eat,
 	 type_consumable, vtf_pond;
 
-unsigned mortal_hd;
-
 SIC_DEF(int, on_consume, unsigned, player_ref, unsigned, vial_ref);
 
 void
 do_consume(int fd, int argc __attribute__((unused)), char *argv[]) {
 	unsigned player_ref = fd_player(fd), vial_ref;
-	mortal_t mortal;
 	char *name = argv[1];
-	int aux;
 
 	if (!*name || (vial_ref = ematch_mine(player_ref, name)) == NOTHING) {
 		nd_writef(player_ref, NOMATCH_MESSAGE);
@@ -42,18 +38,9 @@ do_consume(int fd, int argc __attribute__((unused)), char *argv[]) {
 		return;
 	}
 
-	nd_get(mortal_hd, &mortal, &player_ref);
-	if (cvial->drink) {
-		aux = mortal.huth[HUTH_THIRST] - DRINK_VALUE;
-		mortal.huth[HUTH_THIRST] = aux < 0 ? 0 : aux;
-	}
+	call_feed(player_ref, cvial->drink ? DRINK_VALUE : 0,
+			cvial->food ? FOOD_VALUE(cvial) : 0);
 
-	if (cvial->food) {
-		aux = mortal.huth[HUTH_HUNGER] - FOOD_VALUE(cvial);
-		mortal.huth[HUTH_HUNGER] = aux < 0 ? 0 : aux;
-	}
-
-	nd_put(mortal_hd, &mortal, &player_ref);
 	cvial->quantity--;
 	OBJ player;
 	nd_get(HD_OBJ, &player, &player_ref);
@@ -106,15 +93,15 @@ error:
 	nd_writef(player_ref, CANTDO_MESSAGE);
 }
 
-struct icon on_icon(struct icon i, unsigned ref)
+struct icon on_icon(struct icon i, unsigned ref, unsigned type)
 {
 	OBJ obj;
-	consumable_t *cwhat = (consumable_t *) &obj.data;
+	consumable_t *cwhat;
 
-	nd_get(HD_OBJ, &obj, &ref);
-	if (obj.type != type_consumable)
+	if (type != type_consumable)
 		return i;
 
+	nd_get(HD_OBJ, &obj, &ref);
 	cwhat = (consumable_t *) &obj.data;
 
 	if (cwhat->drink) {
@@ -134,7 +121,7 @@ struct icon on_icon(struct icon i, unsigned ref)
 	return i;
 }
 
-int on_add(unsigned ref, unsigned type, uint64_t v)
+int on_add(unsigned ref, unsigned type, uint64_t v __attribute__((unused)))
 {
 	OBJ obj;
 	SKEL skel;
@@ -174,14 +161,6 @@ void mod_open(void *arg __attribute__((unused))) {
 
 	nd_register("consume", do_consume, 0);
 	nd_register("fill", do_fill, 0);
-
-	/* sic_reg("on_add"); */
-	/* sic_reg("on_view_flags"); */
-	/* sic_reg("on_icon"); */
-
-	SIC_AREG(on_consume);
-
-	nd_get(HD_HD, &mortal_hd, "mortal");
 }
 
 void mod_install(void *arg) {
