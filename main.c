@@ -93,11 +93,14 @@ error:
 	nd_writef(player_ref, CANTDO_MESSAGE);
 }
 
-struct icon on_icon(struct icon i, unsigned ref, unsigned type)
+struct icon on_icon(unsigned ref, unsigned type,
+		unsigned player_ref __attribute__((unused)))
 {
 	OBJ obj;
 	consumable_t *cwhat;
+	struct icon i;
 
+	sic_last(&i);
 	if (type != type_consumable)
 		return i;
 
@@ -151,18 +154,18 @@ unsigned short on_view_flags(unsigned short flags, unsigned ref)
 	return flags | vtf_pond;
 }
 
-void mod_open(void *arg __attribute__((unused))) {
+void mod_open(void) {
 	vtf_pond = vtf_register('~', BLUE, BOLD);
-	act_fill = action_register("fill", "💧");
-	act_drink = action_register("drink", "🧪");
-	act_eat = action_register("eat", "🥄");
-
-	type_consumable = nd_put(HD_TYPE, NULL, "consumable");
-
 	nd_register("consume", do_consume, 0);
 	nd_register("fill", do_fill, 0);
 }
 
-void mod_install(void *arg) {
-	mod_open(arg);
+void mod_install(void) {
+	mod_open();
+
+	type_consumable = nd_put(HD_TYPE, NULL, "consumable");
+
+	act_fill = action_register("fill", "💧");
+	act_drink = action_register("drink", "🧪");
+	act_eat = action_register("eat", "🥄");
 }
