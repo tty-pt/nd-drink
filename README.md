@@ -59,6 +59,13 @@ same command works either way. CI names the deps explicitly
   old `on_icon` body is now a `core_icon_decorate` decorator registered in
   `xy_install` (the shop precedent).
 
+## In-Game Commands (`man-src/`)
+
+| Command | Section | Description |
+|---------|---------|-------------|
+| `fill` | 10 | Refill a liquid container from a water source or font |
+| `consume` | 10 | Drink or eat a consumable item to restore vitality |
+
 ## Testing
 
 There is no `test.sh` here. Behaviour is asserted by the engine's own suite:
